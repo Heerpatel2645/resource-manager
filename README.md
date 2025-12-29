@@ -137,27 +137,4 @@ resource-manager/
 
 Resources are stored in `backend/src/data/resources.json` and files are stored in `backend/uploads/`.
 
-## 🧪 Testing
-
-Currently, no tests are implemented. Future improvements could include:
-- Unit tests for components
-- Integration tests for API endpoints
-- E2E tests for user flows
-
-## 🐛 Known Issues / Future Improvements
-
-- [ ] Add error handling with user-friendly messages
-- [ ] Add loading states for better UX
-- [ ] Add unit tests
-- [ ] Improve form validation with inline errors
-- [ ] Add error boundaries
-- [ ] Add toast notifications instead of alerts
-
-## 📄 License
-
-ISC
-
-## 👤 Author
-
-Built as part of Appcrafters Coding Challenge
 
