@@ -36,6 +36,10 @@ function updateResource(req, res) {
   const { id } = req.params;
   const { title, description, type, link } = req.body;
 
+  if (!title || !description || !type) {
+    return res.status(400).json({ message: "Title, description, and type are required" });
+  }
+
   const resources = getAllResources();
   const resource = resources.find((r) => r.id === id);
 
@@ -43,8 +47,8 @@ function updateResource(req, res) {
     return res.status(404).json({ message: "Resource not found" });
   }
 
+  // Delete old file if a new file is uploaded
   if (req.file) {
-    // remove old file if it exists
     if (resource.fileName) {
       const oldFilePath = path.join(
         __dirname,
@@ -53,22 +57,26 @@ function updateResource(req, res) {
       );
   
       if (fs.existsSync(oldFilePath)) {
-        fs.unlinkSync(oldFilePath);
+        try {
+          fs.unlinkSync(oldFilePath);
+        } catch (error) {
+          console.error("Error deleting old file:", error);
+        }
       }
     }
   
-    // save new file name
+    // Save new file name
     resource.fileName = req.file.filename;
   }
-  
 
+  // Update resource fields
   resource.title = title;
   resource.description = description;
   resource.type = type;
   resource.link = link || "";
 
   saveAllResources(resources);
-  res.json(resource);
+  res.status(200).json(resource);
 }
 
 function deleteResource(req, res) {
@@ -76,7 +84,12 @@ function deleteResource(req, res) {
   let resources = getAllResources();
   const resource = resources.find((r) => r.id === id);
 
-  if (resource && resource.fileName) {
+  if (!resource) {
+    return res.status(404).json({ message: "Resource not found" });
+  }
+
+  // Delete associated file if it exists
+  if (resource.fileName) {
     const filePath = path.join(
       __dirname,
       "../../uploads",
@@ -84,15 +97,19 @@ function deleteResource(req, res) {
     );
 
     if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
+      try {
+        fs.unlinkSync(filePath);
+      } catch (error) {
+        console.error("Error deleting file:", error);
+      }
     }
   }
 
-
+  // Remove resource from array
   resources = resources.filter((r) => r.id !== id);
   saveAllResources(resources);
 
-  res.json({ message: "Resource deleted successfully" });
+  res.status(200).json({ message: "Resource deleted successfully" });
 }
 
 module.exports = {
