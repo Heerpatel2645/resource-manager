@@ -52,6 +52,30 @@ cd ../frontend
 npm install
 ```
 
+### 4. Create Resource Data File
+
+Since `resources.json` is in `.gitignore`, you need to create it manually before running the application:
+
+```bash
+cd ../backend/src/data
+```
+
+Create a file named `resources.json` with the following content (an empty array to start):
+
+```json
+[]
+```
+
+**Note:** If the `data` directory doesn't exist, create it first:
+```bash
+mkdir -p backend/src/data
+```
+
+Alternatively, you can create the file using your text editor:
+- Navigate to `backend/src/data/`
+- Create a new file named `resources.json`
+- Add the content: `[]`
+
 ## 🚀 Running the Application
 
 ### Start Backend Server
