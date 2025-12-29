@@ -1,5 +1,7 @@
 const { getAllResources, saveAllResources } = require("../services/resource.service");
 const { v4: uuid } = require("uuid");
+const fs = require("fs");
+const path = require("path");
 
 function getResources(req, res) {
   const resources = getAllResources();
@@ -21,6 +23,7 @@ function addResource(req, res) {
     description,
     type,
     link: link || "",
+    fileName: req.file ? req.file.filename : "",
   };
 
   resources.push(newResource);
@@ -40,6 +43,25 @@ function updateResource(req, res) {
     return res.status(404).json({ message: "Resource not found" });
   }
 
+  if (req.file) {
+    // remove old file if it exists
+    if (resource.fileName) {
+      const oldFilePath = path.join(
+        __dirname,
+        "../../uploads",
+        resource.fileName
+      );
+  
+      if (fs.existsSync(oldFilePath)) {
+        fs.unlinkSync(oldFilePath);
+      }
+    }
+  
+    // save new file name
+    resource.fileName = req.file.filename;
+  }
+  
+
   resource.title = title;
   resource.description = description;
   resource.type = type;
@@ -52,6 +74,20 @@ function updateResource(req, res) {
 function deleteResource(req, res) {
   const { id } = req.params;
   let resources = getAllResources();
+  const resource = resources.find((r) => r.id === id);
+
+  if (resource && resource.fileName) {
+    const filePath = path.join(
+      __dirname,
+      "../../uploads",
+      resource.fileName
+    );
+
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+  }
+
 
   resources = resources.filter((r) => r.id !== id);
   saveAllResources(resources);
