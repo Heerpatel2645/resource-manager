@@ -1,9 +1,7 @@
+import Home from "./pages/Home";
+
 function App() {
-  return (
-    <div>
-      Resource Manager
-    </div>
-  );
+  return <Home />;
 }
 
 export default App;
