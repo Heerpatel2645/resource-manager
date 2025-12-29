@@ -13,75 +13,108 @@ function AddResourceModal({ onClose, onSuccess, initialData }: Props) {
   const [description, setDescription] = useState("");
   const [type, setType] = useState("Article");
   const [link, setLink] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
+  // Populate form when editing
   useEffect(() => {
     if (initialData) {
       setTitle(initialData.title);
       setDescription(initialData.description);
       setType(initialData.type);
       setLink(initialData.link || "");
+      setFile(null);
     }
   }, [initialData]);
 
   async function handleSubmit() {
-    if (!title || !description) {
-      alert("Please fill all fields");
+    if (!title.trim() || !description.trim()) {
+      setError("Title and description are required");
       return;
     }
 
-    if (initialData) {
-      await updateResource(initialData.id, {
-        title,
-        description,
-        type,
-        link: link.trim() ? link : undefined,
-      });
+    try {
+      setLoading(true);
+      setError(null);
 
-    } else {
-      await createResource({
-        title,
-        description,
+      const payload = {
+        title: title.trim(),
+        description: description.trim(),
         type,
-        link: link.trim() ? link : undefined,
-      });
+        link: link.trim() ? link.trim() : undefined,
+        file: file || undefined,
+      };
+
+      if (initialData) {
+        await updateResource(initialData.id, payload);
+      } else {
+        await createResource(payload);
+      }
+
+      onSuccess();
+      onClose();
+    } catch (err) {
+      setError(initialData ? "Failed to update resource" : "Failed to create resource");
+      console.error("Error submitting form:", err);
+    } finally {
+      setLoading(false);
     }
-
-    onSuccess();
-    onClose();
   }
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
-      <div className="bg-white w-[400px] rounded-lg p-5">
-        <h3 className="text-lg font-semibold mb-4">
-          {initialData ? "Edit Resource" : "Add New Resource"}
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        backgroundColor: "rgba(0,0,0,0.4)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 1000,
+      }}
+    >
+      <div
+        style={{
+          backgroundColor: "#ffffff",
+          width: "400px",
+          borderRadius: "12px",
+          padding: "20px",
+        }}
+      >
+        <h3 style={{ fontSize: "18px", fontWeight: 600, marginBottom: "16px" }}>
+          {initialData ? "Edit Resource" : "Add Resource"}
         </h3>
 
-        <div className="mb-3">
-          <label className="block text-sm mb-1">Title</label>
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded mb-3 text-sm">
+            {error}
+          </div>
+        )}
+
+        <div style={{ marginBottom: "12px" }}>
+          <label style={{ fontSize: "14px" }}>Title</label>
           <input
-            className="w-full border rounded px-3 py-2"
+            style={{ width: "100%", padding: "8px", border: "1px solid #d1d5db", borderRadius: "6px" }}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Enter title"
           />
         </div>
 
-        <div className="mb-3">
-          <label className="block text-sm mb-1">Description</label>
+        <div style={{ marginBottom: "12px" }}>
+          <label style={{ fontSize: "14px" }}>Description</label>
           <textarea
-            className="w-full border rounded px-3 py-2"
             rows={3}
+            style={{ width: "100%", padding: "8px", border: "1px solid #d1d5db", borderRadius: "6px" }}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="Enter description"
           />
         </div>
 
-        <div className="mb-4">
-          <label className="block text-sm mb-1">Type</label>
+        <div style={{ marginBottom: "12px" }}>
+          <label style={{ fontSize: "14px" }}>Type</label>
           <select
-            className="w-full border rounded px-3 py-2"
+            style={{ width: "100%", padding: "8px", border: "1px solid #d1d5db", borderRadius: "6px" }}
             value={type}
             onChange={(e) => setType(e.target.value)}
           >
@@ -91,30 +124,44 @@ function AddResourceModal({ onClose, onSuccess, initialData }: Props) {
           </select>
         </div>
 
-        <div className="mb-3">
-          <label className="block text-sm mb-1">
-            Resource Link (optional)
-          </label>
+        <div style={{ marginBottom: "12px" }}>
+          <label style={{ fontSize: "14px" }}>Link (optional)</label>
           <input
-            className="w-full border rounded px-3 py-2"
-            placeholder="https://example.com"
+            style={{ width: "100%", padding: "8px", border: "1px solid #d1d5db", borderRadius: "6px" }}
             value={link}
             onChange={(e) => setLink(e.target.value)}
           />
         </div>
 
-        <div className="flex justify-end gap-2">
+        <div style={{ marginBottom: "12px" }}>
+          <label style={{ fontSize: "14px" }}>File (optional)</label>
+          <input
+            type="file"
+            onChange={(e) =>
+              setFile(e.target.files ? e.target.files[0] : null)
+            }
+          />
+          {initialData?.fileName && !file && (
+            <p style={{ fontSize: "12px", color: "#6b7280" }}>
+              Current file: {initialData.fileName}
+            </p>
+          )}
+        </div>
+
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px" }}>
           <button
-            className="px-4 py-2 border rounded"
             onClick={onClose}
+            disabled={loading}
+            className="px-3 py-1.5 border border-gray-300 rounded-md text-sm hover:bg-gray-50 disabled:opacity-50"
           >
             Cancel
           </button>
           <button
-            className="px-4 py-2 bg-teal-500 text-white rounded"
             onClick={handleSubmit}
+            disabled={loading}
+            className="px-3 py-1.5 bg-teal-500 text-white rounded-md text-sm hover:bg-teal-600 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {initialData ? "Update" : "Add"}
+            {loading ? "Saving..." : initialData ? "Update" : "Add"}
           </button>
         </div>
       </div>

@@ -5,5 +5,6 @@ export interface Resource {
   title: string;
   description: string;
   type: ResourceType;
-  link?: string
+  link?: string;
+  fileName?: string;
 }

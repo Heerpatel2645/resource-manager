@@ -5,8 +5,12 @@ const api = axios.create({
 });
 
 export const fetchResources = async () => {
-  const res = await api.get("/");
-  return res.data;
+  try {
+    const res = await api.get("/");
+    return res.data;
+  } catch (error) {
+    throw new Error("Failed to fetch resources");
+  }
 };
 
 export const createResource = async (data: {
@@ -14,9 +18,31 @@ export const createResource = async (data: {
   description: string;
   type: string;
   link?: string;
+  file?: File;
 }) => {
-  const res = await api.post("/", data);
-  return res.data;
+  try {
+    const formData = new FormData();
+    formData.append("title", data.title);
+    formData.append("description", data.description);
+    formData.append("type", data.type);
+
+    if (data.link) {
+      formData.append("link", data.link);
+    }
+
+    if (data.file) {
+      formData.append("file", data.file);
+    }
+
+    const res = await api.post("/", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return res.data;
+  } catch (error) {
+    throw new Error("Failed to create resource");
+  }
 };
 
 export const updateResource = async (
@@ -26,13 +52,39 @@ export const updateResource = async (
     description: string;
     type: string;
     link?: string;
+    file?: File;
   }
 ) => {
-  const res = await api.put(`/${id}`, data);
-  return res.data;
+  try {
+    const formData = new FormData();
+    formData.append("title", data.title);
+    formData.append("description", data.description);
+    formData.append("type", data.type);
+
+    if (data.link) {
+      formData.append("link", data.link);
+    }
+
+    if (data.file) {
+      formData.append("file", data.file);
+    }
+
+    const res = await api.put(`/${id}`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return res.data;
+  } catch (error) {
+    throw new Error("Failed to update resource");
+  }
 };
 
 export const deleteResource = async (id: string) => {
-  await api.delete(`/${id}`);
+  try {
+    await api.delete(`/${id}`);
+  } catch (error) {
+    throw new Error("Failed to delete resource");
+  }
 };
 
