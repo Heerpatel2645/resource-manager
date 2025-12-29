@@ -39,6 +39,7 @@ function Home() {
     } catch (err) {
       setError("Failed to delete resource. Please try again.");
       console.error("Error deleting resource:", err);
+      throw err; // Re-throw to let modal handle it
     }
   }
 

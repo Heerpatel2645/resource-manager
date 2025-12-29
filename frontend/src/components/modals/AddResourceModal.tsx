@@ -17,7 +17,7 @@ function AddResourceModal({ onClose, onSuccess, initialData }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Populate form when editing
+  // Populate form when editing, reset when adding
   useEffect(() => {
     if (initialData) {
       setTitle(initialData.title);
@@ -25,6 +25,14 @@ function AddResourceModal({ onClose, onSuccess, initialData }: Props) {
       setType(initialData.type);
       setLink(initialData.link || "");
       setFile(null);
+    } else {
+      // Reset form for new resource
+      setTitle("");
+      setDescription("");
+      setType("Article");
+      setLink("");
+      setFile(null);
+      setError(null);
     }
   }, [initialData]);
 
@@ -52,10 +60,12 @@ function AddResourceModal({ onClose, onSuccess, initialData }: Props) {
         await createResource(payload);
       }
 
+      // Refresh resources and close modal only after successful update/create
       onSuccess();
       onClose();
-    } catch (err) {
-      setError(initialData ? "Failed to update resource" : "Failed to create resource");
+    } catch (err: any) {
+      const errorMessage = err?.message || (initialData ? "Failed to update resource" : "Failed to create resource");
+      setError(errorMessage);
       console.error("Error submitting form:", err);
     } finally {
       setLoading(false);

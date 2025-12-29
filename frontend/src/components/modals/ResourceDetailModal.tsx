@@ -265,12 +265,17 @@ import {
             </button>
 
             <button
-              onClick={() => {
+              onClick={async () => {
                 if (
                   confirm("Are you sure you want to delete this resource?")
                 ) {
-                  onDelete(resource.id);
-                  onClose();
+                  try {
+                    await onDelete(resource.id);
+                    onClose();
+                  } catch (error) {
+                    console.error("Delete error:", error);
+                    alert("Failed to delete resource. Please try again.");
+                  }
                 }
               }}
               style={{

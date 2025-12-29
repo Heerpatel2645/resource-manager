@@ -75,15 +75,24 @@ export const updateResource = async (
       },
     });
     return res.data;
-  } catch (error) {
+  } catch (error: any) {
+    console.error("Update API error:", error);
+    if (error.response) {
+      throw new Error(error.response.data?.message || "Failed to update resource");
+    }
     throw new Error("Failed to update resource");
   }
 };
 
 export const deleteResource = async (id: string) => {
   try {
-    await api.delete(`/${id}`);
-  } catch (error) {
+    const response = await api.delete(`/${id}`);
+    return response.data;
+  } catch (error: any) {
+    console.error("Delete API error:", error);
+    if (error.response) {
+      throw new Error(error.response.data?.message || "Failed to delete resource");
+    }
     throw new Error("Failed to delete resource");
   }
 };
