@@ -7,7 +7,7 @@ function getResources(req, res) {
 }
 
 function addResource(req, res) {
-  const { title, description, type } = req.body;
+  const { title, description, type, link } = req.body;
 
   if (!title || !description || !type) {
     return res.status(400).json({ message: "All fields are required" });
@@ -20,6 +20,7 @@ function addResource(req, res) {
     title,
     description,
     type,
+    link: link || "",
   };
 
   resources.push(newResource);
@@ -30,7 +31,7 @@ function addResource(req, res) {
 
 function updateResource(req, res) {
   const { id } = req.params;
-  const { title, description, type } = req.body;
+  const { title, description, type, link } = req.body;
 
   const resources = getAllResources();
   const resource = resources.find((r) => r.id === id);
@@ -42,6 +43,7 @@ function updateResource(req, res) {
   resource.title = title;
   resource.description = description;
   resource.type = type;
+  resource.link = link || "";
 
   saveAllResources(resources);
   res.json(resource);
