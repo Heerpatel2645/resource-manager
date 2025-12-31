@@ -17,7 +17,7 @@ function AddResourceModal({ onClose, onSuccess, initialData }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Populate form when editing, reset when adding
+  
   useEffect(() => {
     if (initialData) {
       setTitle(initialData.title);
@@ -26,7 +26,7 @@ function AddResourceModal({ onClose, onSuccess, initialData }: Props) {
       setLink(initialData.link || "");
       setFile(null);
     } else {
-      // Reset form for new resource
+     
       setTitle("");
       setDescription("");
       setType("Article");
